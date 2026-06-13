@@ -77,6 +77,7 @@ export interface ProfGoalYear {
 }
 
 export const profGoalData = writable<ProfGoalYear[]>([]);
+export const profOrder = writable<Record<string, string[]>>({});
 
 export function generateProfGoalStructureToDate(targetDate: Date): void {
     const targetYear = targetDate.getFullYear();
@@ -483,6 +484,13 @@ export function addSubHighlight(
             }
         }
     }));
+      profOrder.update((order) => ({
+            ...order,
+            [parentId]: [
+                ...(order[parentId] ?? []),
+                id
+            ]
+        }));
 }
 
 export function addDetailHighlight(
@@ -537,6 +545,12 @@ export function removeSubHighlight(
 
         return updated;
     });
+      profOrder.update((order) => ({
+         ...order,
+         [parentId]: (order[parentId] ?? []).filter(
+             (id) => id !== childId
+         )
+     }));
 }
 
 export function removeDetailHighlight(
@@ -1004,3 +1018,21 @@ export function removeImagePatternStep(
   });
 }
 
+export function initProfOrder(profGoalHighlights: Record<string, HighlightLevel1>) {
+    if (!profGoalHighlights || Object.keys(profGoalHighlights).length === 0) return;
+    profOrder.update((currentOrder) => {
+        if (currentOrder && Object.keys(currentOrder).length > 0) {
+            return currentOrder;
+        }
+        console.log(`Initializing persOrder`);
+        const orderData: Record<string, string[]> = {};
+
+        for (const levelOne of Object.values(profGoalHighlights)) {
+            orderData[levelOne.text] = Object.values(levelOne.children).map(
+                (levelTwo) => levelTwo.text
+            );
+        }
+
+        return orderData;
+    });
+}

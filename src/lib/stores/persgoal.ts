@@ -1,6 +1,7 @@
 import { writable, get } from 'svelte/store';
 
 import { makeId, getDayOfWeek, getDaysInMonth } from './general';
+import { persOrder } from '$lib/stores/projects';
 
 export const LockState = {
     LOCKED: 'locked',
@@ -31,7 +32,7 @@ interface HighlightLevel3 {
     me: boolean;
 }
 
-interface HighlightLevel2 {
+export interface HighlightLevel2 {
     text: string;
     children: Record<string, HighlightLevel3>;
     patterns?: Record<string, string[]>;
@@ -44,7 +45,7 @@ export interface HighlightLevel1 {
 }
 
 export const persGoalHighlights = writable<Record<string, HighlightLevel1>>({});
-//export const persOrder = writable<string[]>([]);
+
 export type PersLockState = typeof LockState[keyof typeof LockState];
 
 type PersImage = {
@@ -175,6 +176,24 @@ export function generatePersGoalStructureToDate(targetDate: Date): void {
     });
 }
 
+export function initPersOrder(persGoalHighlights: Record<string, HighlightLevel1>) {
+	if (!persGoalHighlights || Object.keys(persGoalHighlights).length === 0) return;
+	persOrder.update((currentOrder) => {
+		if (currentOrder && Object.keys(currentOrder).length > 0) {
+			return currentOrder;
+		}
+        console.log(`Initializing persOrder`);
+		const orderData: Record<string, string[]> = {};
+
+		for (const levelOne of Object.values(persGoalHighlights)) {
+			orderData[levelOne.text] = Object.values(levelOne.children).map(
+				(levelTwo) => levelTwo.text
+			);
+		}
+
+		return orderData;
+	});
+}
 // Update year private goal
 // updateYearPrivateGoal(yearId: string, value: string): void
 export function updateYearPrivateGoal(
@@ -840,6 +859,7 @@ export function addHighlightItem() {
     }));
 }
 
+//Add persOrder update
 export function addSubHighlight(
     parentId: string
 ) {
@@ -857,6 +877,13 @@ export function addSubHighlight(
                 }
             }
         }
+    }));
+     persOrder.update((order) => ({
+        ...order,
+        [parentId]: [
+            ...(order[parentId] ?? []),
+            id
+        ]
     }));
 }
 
@@ -911,6 +938,13 @@ export function removeSubHighlight(
 
         return updated;
     });
+
+     persOrder.update((order) => ({
+        ...order,
+        [parentId]: (order[parentId] ?? []).filter(
+            (id) => id !== childId
+        )
+    }));
 }
 
 export function removeDetailHighlight(

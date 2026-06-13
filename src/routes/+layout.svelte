@@ -10,8 +10,6 @@
 		loadUserDataEncryption,
 		initPersistence,
 		setHydrated,
-		saveUserData,
-		saveUserEncryptionData,
 	} from "$lib/persistence";
 	import { persLockState, LockState } from "$lib/stores/persgoal";
 	import { get } from "svelte/store";
@@ -28,18 +26,18 @@
 	let diskTotal = $state(0);
 	let diskAvailable = $state(0);
 	let diskUsed = $state(0);
-	let recordingStatus: RecordingStatus = $state("Idle");
-	let transcribedText = $state("");
-	let inputLanguage = $state<"en" | "es">("en");
-	let outputLanguage = $state<"en" | "es">("en");
+	// let recordingStatus: RecordingStatus = $state("Idle");
+	// let transcribedText = $state("");
+	// let inputLanguage = $state<"en" | "es">("en");
+	// let outputLanguage = $state<"en" | "es">("en");
 	let { children } = $props();
-	let audio: HTMLAudioElement | null = null;
+	// let audio: HTMLAudioElement | null = null;
 
-	type RecordingStatus = "Idle" | "Recording" | "Paused" | "Processing";
+	// type RecordingStatus = "Idle" | "Recording" | "Paused" | "Processing";
 
 	let showFocus = $state(false);
 	let hideTop = $state(false);
-	let hasPendingGoalToday = $state(false);
+//	let hasPendingGoalToday = $state(false);
 
 	async function bootstrapApp() {
 		await loadUserData();
@@ -78,21 +76,21 @@
 			clearInterval(ramInterval);
 			clearInterval(gpuInterval);
 			clearInterval(diskInterval);
-			if (audio) {
-				audio.pause();
-				audio.src = "";
-			}
+			// if (audio) {
+			// 	audio.pause();
+			// 	audio.src = "";
+			// }
 		};
 	});
 
 	// Clean up when component unmounts
 	// onDestroy(): void
 	onDestroy(() => {
-		if (audio) {
-			audio.pause();
-			audio.src = "";
-			audio = null;
-		}
+		// if (audio) {
+		// 	audio.pause();
+		// 	audio.src = "";
+		// 	audio = null;
+		// }
 	});
 
 	// backupData(): Promise<void>
@@ -151,64 +149,64 @@
 		}
 	}
 
-	function handlePlayPause() {
-		console.log("in handlePlayPause");
-		if (recordingStatus === "Idle") {
-			startRecording();
-		} else if (recordingStatus === "Recording") {
-			pauseRecording();
-		} else if (recordingStatus === "Paused") {
-			resumeRecording();
-		}
-	}
+	// function handlePlayPause() {
+	// 	console.log("in handlePlayPause");
+	// 	if (recordingStatus === "Idle") {
+	// 		startRecording();
+	// 	} else if (recordingStatus === "Recording") {
+	// 		pauseRecording();
+	// 	} else if (recordingStatus === "Paused") {
+	// 		resumeRecording();
+	// 	}
+	// }
 
 	// Speech-to-text functions
-	async function startRecording() {
-		try {
-			await invoke("start_recording");
-			recordingStatus = "Recording";
-			transcribedText = "";
-		} catch (error) {
-			console.error("Failed to start recording:", error);
-			alert("Failed to start recording: " + error);
-		}
-	}
+	// async function startRecording() {
+	// 	try {
+	// 		await invoke("start_recording");
+	// 		recordingStatus = "Recording";
+	// 		transcribedText = "";
+	// 	} catch (error) {
+	// 		console.error("Failed to start recording:", error);
+	// 		alert("Failed to start recording: " + error);
+	// 	}
+	// }
 
-	async function pauseRecording() {
-		try {
-			await invoke("pause_recording");
-			recordingStatus = "Paused";
-		} catch (error) {
-			console.error("Failed to pause recording:", error);
-			alert("Failed to pause recording: " + error);
-		}
-	}
+	// async function pauseRecording() {
+	// 	try {
+	// 		await invoke("pause_recording");
+	// 		recordingStatus = "Paused";
+	// 	} catch (error) {
+	// 		console.error("Failed to pause recording:", error);
+	// 		alert("Failed to pause recording: " + error);
+	// 	}
+	// }
 
-	async function resumeRecording() {
-		try {
-			await invoke("resume_recording");
-			recordingStatus = "Recording";
-		} catch (error) {
-			console.error("Failed to resume recording:", error);
-			alert("Failed to resume recording: " + error);
-		}
-	}
+	// async function resumeRecording() {
+	// 	try {
+	// 		await invoke("resume_recording");
+	// 		recordingStatus = "Recording";
+	// 	} catch (error) {
+	// 		console.error("Failed to resume recording:", error);
+	// 		alert("Failed to resume recording: " + error);
+	// 	}
+	// }
 
-	async function stopRecordingAndTranscribe() {
-		try {
-			recordingStatus = "Processing";
-			const text = await invoke<string>("stop_recording_and_transcribe", {
-				inputLang: inputLanguage,
-				outputLang: outputLanguage,
-			});
-			transcribedText = text;
-			recordingStatus = "Idle";
-		} catch (error) {
-			console.error("Failed to stop and transcribe:", error);
-			alert("Failed to transcribe: " + error);
-			recordingStatus = "Idle";
-		}
-	}
+	// async function stopRecordingAndTranscribe() {
+	// 	try {
+	// 		recordingStatus = "Processing";
+	// 		const text = await invoke<string>("stop_recording_and_transcribe", {
+	// 			inputLang: inputLanguage,
+	// 			outputLang: outputLanguage,
+	// 		});
+	// 		transcribedText = text;
+	// 		recordingStatus = "Idle";
+	// 	} catch (error) {
+	// 		console.error("Failed to stop and transcribe:", error);
+	// 		alert("Failed to transcribe: " + error);
+	// 		recordingStatus = "Idle";
+	// 	}
+	// }
 
 	function handleBackup() {
 		console.log("✅ Backup button clicked");
@@ -217,51 +215,51 @@
 	}
 
 	// Language selection handlers
-	function handleInputLanguageChange(lang: "en" | "es") {
-		inputLanguage = lang;
-		// If switching to English input and Spanish output is selected, reset to English output
-		if (lang === "en" && outputLanguage === "es") {
-			outputLanguage = "en";
-		}
-	}
+	// function handleInputLanguageChange(lang: "en" | "es") {
+	// 	inputLanguage = lang;
+	// 	// If switching to English input and Spanish output is selected, reset to English output
+	// 	if (lang === "en" && outputLanguage === "es") {
+	// 		outputLanguage = "en";
+	// 	}
+	// }
 
-	function handleOutputLanguageChange(lang: "en" | "es") {
-		// Prevent EN input -> SP output (invalid combination)
-		if (inputLanguage === "en" && lang === "es") {
-			return; // Disallow this combination
-		}
-		outputLanguage = lang;
-	}
+	// function handleOutputLanguageChange(lang: "en" | "es") {
+	// 	// Prevent EN input -> SP output (invalid combination)
+	// 	if (inputLanguage === "en" && lang === "es") {
+	// 		return; // Disallow this combination
+	// 	}
+	// 	outputLanguage = lang;
+	// }
 
-	// Keyboard shortcuts handler
-	function handleKeydown(e: KeyboardEvent) {
-		// Ignore modifier keys by themselves
-		if (
-			e.key === "Control" ||
-			e.key === "Shift" ||
-			e.key === "Alt" ||
-			e.key === "Meta"
-		) {
-			return;
-		}
+	// // Keyboard shortcuts handler
+	// function handleKeydown(e: KeyboardEvent) {
+	// 	// Ignore modifier keys by themselves
+	// 	if (
+	// 		e.key === "Control" ||
+	// 		e.key === "Shift" ||
+	// 		e.key === "Alt" ||
+	// 		e.key === "Meta"
+	// 	) {
+	// 		return;
+	// 	}
 
-		if (e.altKey && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-			if (e.key === "3") {
-				e.preventDefault();
-				console.log("Alt+3 detected! Starting handlePlayPause");
-				handlePlayPause();
-			} else if (e.key === "4") {
-				e.preventDefault();
-				console.log("Alt+4 detected! Status:", recordingStatus);
-				if (
-					recordingStatus !== "Idle" &&
-					recordingStatus !== "Processing"
-				) {
-					stopRecordingAndTranscribe();
-				}
-			}
-		}
-	}
+	// 	if (e.altKey && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+	// 		if (e.key === "3") {
+	// 			e.preventDefault();
+	// 			console.log("Alt+3 detected! Starting handlePlayPause");
+	// 			handlePlayPause();
+	// 		} else if (e.key === "4") {
+	// 			e.preventDefault();
+	// 			console.log("Alt+4 detected! Status:", recordingStatus);
+	// 			if (
+	// 				recordingStatus !== "Idle" &&
+	// 				recordingStatus !== "Processing"
+	// 			) {
+	// 				stopRecordingAndTranscribe();
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	let focusTextClass = $derived(showFocus ? "text-white/30" : "text-white");
 </script>
@@ -270,7 +268,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<svelte:window on:keydown={handleKeydown} />
+<!-- <svelte:window on:keydown={handleKeydown} /> -->
 
 <div class="h-screen bg-black overflow-y-auto font-mono">
 	<button
@@ -381,9 +379,8 @@
 			</div>
 
 			<!-- Speech To Text -->
-			<div class="flex flex-wrap gap-4 mb-4 items-stretch">
-				<!-- Backup Button -->
-				<button
+			<!-- <div class="flex flex-wrap gap-4 mb-4 items-stretch">
+							<button
 					onclick={handleBackup}
 					disabled={backupStatus === "saving"}
 					class="px-3 h-[52px] rounded-lg font-semibold text-sm transition-all
@@ -403,9 +400,7 @@
 					{/if}
 				</button>
 
-				<!-- Disk Usage and Language Selection -->
 				<div class="flex flex-col justify-between h-[52px]">
-					<!--Disk Usage-->
 					<h1
 						class="text-lg leading-tight {showFocus
 							? 'text-white/30'
@@ -414,9 +409,7 @@
 						AD {(diskAvailable / 1073741824).toFixed(1)}
 					</h1>
 
-					<!-- Language Selection -->
 					<div class="flex flex-col gap-0.5 text-xs">
-						<!-- English row -->
 						<div
 							class="flex items-center gap-2 {showFocus
 								? 'text-white/30'
@@ -453,7 +446,6 @@
 							</label>
 						</div>
 
-						<!-- Spanish row -->
 						<div
 							class="flex items-center gap-2 {showFocus
 								? 'text-white/30'
@@ -499,12 +491,10 @@
 						</div>
 					</div>
 				</div>
-				<!-- Speech to Text Controls -->
 				<div
 					class="bg-white/10 backdrop-blur-sm rounded-2xl p-1 w-55 h-[52px]"
 				>
 					<div class="flex items-center gap-2">
-						<!-- Play/Pause Button -->
 						<button
 							onclick={handlePlayPause}
 							disabled={recordingStatus === "Processing"}
@@ -533,7 +523,6 @@
 							{/if}
 						</button>
 
-						<!-- Stop Button -->
 						<button
 							onclick={stopRecordingAndTranscribe}
 							disabled={recordingStatus === "Idle" ||
@@ -544,7 +533,6 @@
 							<Square class="w-10 h-10 text-amber-300" />
 						</button>
 
-						<!-- Status Text -->
 						<div class="ml-2 flex-1">
 							<p
 								class="font-semibold text-sm {showFocus
@@ -570,9 +558,9 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 
 		<Navigation />
 		{@render children?.()}
 	</div>
-</div>
+</div></div>

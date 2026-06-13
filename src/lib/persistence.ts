@@ -3,7 +3,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { todosByDate, todoField1, todoField2, todoExpandedState } from '$lib/stores/todo';
 import { commandData, commandExpandedCategories, commandExpandedSubcategories } from '$lib/stores/commands';
-import { projectsData, projectExpandedProjects, projectExpandedSubprojects, projectExpandedTasks, projectOrder, initProjectOrder } from '$lib/stores/projects';
+import { projectsData, projectExpandedProjects, projectExpandedSubprojects, projectExpandedTasks, projectOrder, persOrder, initProjectOrder } from '$lib/stores/projects';
 import { howtoData, howtoExpandedCategories, howtoExpandedSubcategories, howtoExpandedTopics } from '$lib/stores/howto';
 import { financeData, financeExpandedYears, financeExpandedMonths, 
 	financeExpandedWeeks, financeNames, type FinanceNames } from '$lib/stores/finance';
@@ -15,7 +15,7 @@ import {
 	type PersLockState
 } from '$lib/stores/persgoal';
 import { profGoalData, profGoalExpandedYears, profGoalExpandedMonths, profGoalExpandedWeeks, 
-	profGoalHighlights} from '$lib/stores/profgoal';
+	profGoalHighlights, profOrder } from '$lib/stores/profgoal';
 import { workspaceContentA, workspaceContentB } from '$lib/stores/workspace';
 import { goalData, goalOrder, type GoalThread } from './stores/thegoals';
 import { pass } from "$lib/stores/auth";
@@ -66,6 +66,8 @@ interface UserData {
 	projectExpandedSubprojects?: Record<string, boolean>;
 	projectExpandedTasks?: Record<string, boolean>;
 	projectorder?: string[];
+	persorder?: Record<string,string[]>;
+	proforder?: Record<string, string[]>;
 	howtoExpandedCategories?: Record<string, boolean>;
 	howtoExpandedSubcategories?: Record<string, boolean>;
 	howtoExpandedTopics?: Record<string, boolean>;
@@ -199,6 +201,8 @@ export async function saveUserData(domain: PersistDomain): Promise<void> {
 			projectExpandedSubprojects: get(projectExpandedSubprojects),
 			projectExpandedTasks: get(projectExpandedTasks),
 			projectorder: get(projectOrder),
+			persorder: get(persOrder),
+			proforder:get(profOrder),
 			howtoExpandedCategories: get(howtoExpandedCategories),
 			howtoExpandedSubcategories: get(howtoExpandedSubcategories),
 			howtoExpandedTopics: get(howtoExpandedTopics),
@@ -267,6 +271,12 @@ export async function loadUserData(): Promise<void> {
 			projectOrder.set(initProjectOrder());
 		}else{
 			projectOrder.set(data.projectorder);
+		}
+		if (data.persorder) {
+			persOrder.set(data.persorder ?? []);
+		}
+		if (data.proforder) {
+			profOrder.set(data.proforder ?? []);
 		}
 		if (data.howtoExpandedCategories) {
 			howtoExpandedCategories.set(data.howtoExpandedCategories);
@@ -440,6 +450,15 @@ export function initPersistence() {
 	projectOrder.subscribe(() => {
 		if (!isHydrated) return;
 		scheduleSave("projects");
+	});
+//did not want to mess with encryption - adding this pers functionality to projects. 
+	persOrder.subscribe(() => {
+		if (!isHydrated) return;
+		scheduleSave("projects");
+	});
+	profOrder.subscribe(() => {
+		if (!isHydrated) return;
+		scheduleSave("profgoal");
 	});
 
 	// Subscribe to howto changes
